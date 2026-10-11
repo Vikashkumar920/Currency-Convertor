@@ -1,11 +1,11 @@
 const countryList = {
-  AED:"AE", AFN:"AF", ALL:"AL", AMD:"AM", AUD:"AU", BDT:"BD", BGN:"BG",
-  BRL:"BR", CAD:"CA", CHF:"CH", CNY:"CN", DKK:"DK", EGP:"EG", EUR:"FR",
-  GBP:"GB", HKD:"HK", IDR:"ID", ILS:"IL", INR:"IN", JPY:"JP", KRW:"KR",
-  KWD:"KW", LKR:"LK", MXN:"MX", MYR:"MY", NGN:"NG", NOK:"NO", NPR:"NP",
-  NZD:"NZ", OMR:"OM", PHP:"PH", PKR:"PK", PLN:"PL", QAR:"QA", RUB:"RU",
-  SAR:"SA", SEK:"SE", SGD:"SG", THB:"TH", TRY:"TR", TWD:"TW", USD:"US",
-  ZAR:"ZA"
+  AED: "AE", AFN: "AF", ALL: "AL", AMD: "AM", AUD: "AU", BDT: "BD", BGN: "BG",
+  BRL: "BR", CAD: "CA", CHF: "CH", CNY: "CN", DKK: "DK", EGP: "EG", EUR: "FR",
+  GBP: "GB", HKD: "HK", IDR: "ID", ILS: "IL", INR: "IN", JPY: "JP", KRW: "KR",
+  KWD: "KW", LKR: "LK", MXN: "MX", MYR: "MY", NGN: "NG", NOK: "NO", NPR: "NP",
+  NZD: "NZ", OMR: "OM", PHP: "PH", PKR: "PK", PLN: "PL", QAR: "QA", RUB: "RU",
+  SAR: "SA", SEK: "SE", SGD: "SG", THB: "TH", TRY: "TR", TWD: "TW", USD: "US",
+  ZAR: "ZA"
 };
 
 const fromCurrency = document.getElementById("fromCurrency");
@@ -44,19 +44,40 @@ document.getElementById("swap").addEventListener("click", () => {
 });
 
 // 🔥 BUTTON CLICK — GUARANTEED WORKING
+
 btn.addEventListener("click", async () => {
-  let amt = amount.value || 1;
-  let from = fromCurrency.value;
-  let to = toCurrency.value;
+  const amt = Number(amount.value);
+  const from = fromCurrency.value;
+  const to = toCurrency.value;
+
+  if (!Number.isFinite(amt) || amt <= 0) {
+    result.innerText = "Please enter a valid amount";
+    return;
+  }
+
+  if (from === to) {
+    result.innerText = `${amt} ${from} = ${amt.toFixed(5)} ${to}`;
+    return;
+  }
+
+  result.innerText = "Fetching exchange rate...";
 
   try {
-    const url = `https://api.frankfurter.app/latest?amount=${amt}&from=${from}&to=${to}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    const url = `https://api.frankfurter.dev/v2/rate/${from}/${to}`;
 
-    const converted = data.rates[to];
-    result.innerText = `${amt} ${from} = ${converted.toFixed(5)} ${to}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("API request failed");
+    }
+
+    const data = await response.json();
+    const converted = amt * data.rate;
+
+    result.innerText =
+      `${amt} ${from} = ${converted.toFixed(5)} ${to}`;
   } catch (err) {
-    result.innerText = "Error fetching exchange rate";
+    console.error(err);
+    result.innerText = "Unable to fetch exchange rate. Try again.";
   }
 });
