@@ -45,39 +45,40 @@ document.getElementById("swap").addEventListener("click", () => {
 
 // 🔥 BUTTON CLICK — GUARANTEED WORKING
 
+
 btn.addEventListener("click", async () => {
   const amt = Number(amount.value);
   const from = fromCurrency.value;
   const to = toCurrency.value;
 
   if (!Number.isFinite(amt) || amt <= 0) {
-    result.innerText = "Please enter a valid amount";
+    result.innerText = "Enter a valid amount";
     return;
   }
 
   if (from === to) {
-    result.innerText = `${amt} ${from} = ${amt.toFixed(5)} ${to}`;
+    result.innerText = `${amt} ${from} = ${amt.toFixed(2)} ${to}`;
     return;
   }
 
-  result.innerText = "Fetching exchange rate...";
-
   try {
-    const url = `https://api.frankfurter.dev/v2/rate/${from}/${to}`;
+    result.innerText = "Loading...";
 
+    const url = `https://api.frankfurter.dev/v2/rate/${from}/${to}`;
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error("API request failed");
+      throw new Error(`HTTP Error: ${response.status}`);
     }
 
     const data = await response.json();
     const converted = amt * data.rate;
 
     result.innerText =
-      `${amt} ${from} = ${converted.toFixed(5)} ${to}`;
+      `${amt} ${from} = ${converted.toFixed(2)} ${to}`;
+
   } catch (err) {
-    console.error(err);
-    result.innerText = "Unable to fetch exchange rate. Try again.";
+    console.error("Currency API error:", err);
+    result.innerText = "Error fetching exchange rate";
   }
 });
